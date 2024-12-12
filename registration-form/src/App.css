@@ -2,9 +2,15 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+ 
 }
-
+img{
+  width: 100px;
+  height: 150px;
+}
+select{
+  width: 25em;
+}
 .logo {
   height: 6em;
   padding: 1.5em;
