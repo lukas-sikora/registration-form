@@ -16,7 +16,7 @@ function Modal({ data }) {
             <h2>Doświadczenie w Programowaniu</h2>
             <ul>
               {data.experience.map((el) => (
-                <li key={el}>
+                <li key={el.name}>
                   Technologia: {el.name} / poziom: {el.level}
                 </li>
               ))}
