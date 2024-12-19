@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Modal from "./Modal";
+import s from "./RegistrationForm.module.css";
+import Input from "./Input";
+import Options from "./Options";
 
 const formSchema = z
   .object({
@@ -21,7 +24,7 @@ const formSchema = z
       .array()
       .nonempty({ message: "Proszę wybrać co najmniej jedną technologię" }),
     cv: z.instanceof(FileList).refine((files) => files.length > 0, {
-      message: "Musisz dodać załącznik jako zdjęcie w formacie jpeg lub png.",
+      message: "Musisz dodać załącznik jako zdjęcie.",
     }),
     checkbox: z.boolean(),
     experience: z
@@ -49,20 +52,27 @@ const formSchema = z
   );
 
 const RegistrationForm = () => {
-  const [checked, setChecked] = useState(false);
   const [getData, setGetData] = useState(0);
+  const optionList = ["JavaScript", "React", "Html", "CSS", "Java"];
+  const levelList = [1, 2, 3, 4, 5];
+
+  const methods = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      learningType: "online",
+      experience: [],
+    },
+  });
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      learningType: "online",
-    },
-  });
+    watch,
+    setValue,
+    trigger,
+  } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -73,132 +83,152 @@ const RegistrationForm = () => {
     setGetData(data);
   };
 
-  console.log("data", getData);
-  console.log("typ kursu", getData.learningType);
+  const checkboxValue = watch("checkbox");
+
+  const handleCheckboxChange = (event) => {
+    const isChecked = event.target.checked;
+    setValue("checkbox", isChecked);
+    if (!isChecked) {
+      setValue("experience", []);
+      trigger("experience");
+    }
+  };
 
   return (
     <>
       {getData === 0 && (
-        <div>
+        <>
           <div>
-            <h1>Formularz zgłoszeniowy na kurs programowania</h1>
+            <h1 className={s.header}>
+              Formularz zgłoszeniowy na kurs programowania
+            </h1>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <h2>Dane osobowe</h2>
-            <input {...register("name")} type="text" placeholder="Imię" />
-            {errors.name?.message && <p>{errors.name?.message}</p>}
-            <br />
-            <input
-              {...register("lastname")}
-              type="text"
-              placeholder="Nazwisko"
-            />
-            {errors.lastname?.message && <p>{errors.lastname?.message}</p>}
-            <br />
-            <input {...register("email")} type="email" placeholder="E-mail" />
-            {errors.email?.message && <p>{errors.email?.message}</p>}
-            <br />
-            <input
-              {...register("tel")}
-              type="number"
-              placeholder="Numer telefonu"
-            />
-            {errors.tel?.message && <p>{errors.tel?.message}</p>}
-            <h2>Preferencje kursu</h2>
-            <p>
-              Wybierz formę nauki:
-              <input
-                {...register("learningType")}
-                name="learningType"
-                type="radio"
-                value={"stacjonarny"}
-              />
-              stacjonarnie
-              <input
-                {...register("learningType")}
-                name="learningType"
-                type="radio"
-                value={"online"}
-              />
-              online
-            </p>
-            <select
-              {...register("technologies")}
-              size={5}
-              multiple={"multiple"}
-            >
-              <option value={"JavaScript"}>JavaScript</option>
-              <option value={"React"}>React</option>
-              <option value={"Html"}>Html</option>
-              <option value={"CSS"}>CSS</option>
-              <option value={"Node"}>Node</option>
-              <option value={"Node1"}>Node1</option>
-              <option value={"Node2"}>Node2</option>
-              <option value={"Node3"}>Node3</option>
-            </select>
-            {errors.technologies?.message && (
-              <p>{errors.technologies?.message}</p>
-            )}
-            <div>
-              <h2>Dodaj swoje CV</h2>
-              <input {...register("cv")} type="file" accept=".jpeg, .png" />
-              {errors.cv?.message && <p>{errors.cv?.message}</p>}
-            </div>
-            <h2>Doświadczenie w Programowaniu</h2>
-            <p>
-              <input
-                {...register("checkbox")}
-                onClick={() => {
-                  setChecked(!checked);
-                }}
-                type="checkbox"
-              />{" "}
-              <label>Czy posiadasz doświadczenie w programowaniu?</label>
-            </p>
-            {errors.experience?.message && <p>{errors.experience?.message}</p>}
-            {checked && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    append({ name: "JavaScript", level: 1 });
-                  }}
-                >
-                  Dodaj doświadczenie
-                </button>
-                <br />
-                {fields.map((field, index) => (
-                  <div key={field.id}>
-                    <select
-                      {...register(`experience.${index}.name`)}
-                      defaultValue={"JavaScript"}
-                    >
-                      <option value={"JavaScript"}>JavaScript</option>
-                      <option value={"HTML"}>HTML</option>
-                      <option value={"NODE"}>NODE</option>
-                      <option value={"REACT"}>REACT</option>
-                      <option value={"C#"}>C#</option>
-                    </select>
-                    <select {...register(`experience.${index}.level`)}>
-                      <option value={1}>1</option>
-                      <option value={2}>2</option>
-                      <option value={3}>3</option>
-                      <option value={4}>4</option>
-                      <option value={5}>5</option>
-                    </select>
-                    <button type="button" onClick={() => remove(index)}>
-                      Usuń
-                    </button>
+          <FormProvider {...methods}>
+            <form className={s.form} onSubmit={handleSubmit(onSubmit)}>
+              <div>
+                <h2>Dane osobowe</h2>
+                <Input name="name" placeholder="Imię" />
+                <Input name="lastname" placeholder="Nazwisko" />
+                <Input name="email" placeholder="E-mail" />
+                <Input type="number" name="tel" placeholder="Numer telefonu" />
+              </div>
+              <div>
+                <h2>Preferencje kursu</h2>
+                <div>
+                  Wybierz formę nauki:
+                  <label>
+                    <input
+                      className={s.input}
+                      {...register("learningType")}
+                      name="learningType"
+                      type="radio"
+                      value={"stacjonarny"}
+                    />
+                    stacjonarnie
+                  </label>
+                  <label>
+                    <input
+                      className={s.input}
+                      {...register("learningType")}
+                      name="learningType"
+                      type="radio"
+                      value={"online"}
+                    />
+                    online
+                  </label>
+                </div>
+                <div>
+                  <select
+                    className={s.selectField}
+                    {...register("technologies")}
+                    size={5}
+                    multiple={"multiple"}
+                  >
+                    <Options arr={optionList} />
+                  </select>
+                  {errors.technologies?.message && (
+                    <p className={s.message}>{errors.technologies?.message}</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h2>Dodaj swoje CV</h2>
+                <div>
+                  <div>
+                    <label>
+                      <input
+                        {...register("cv")}
+                        type="file"
+                        accept=".jpeg, .png"
+                      />
+                    </label>
                   </div>
-                ))}
-              </>
-            )}
-            <br />
-            <button type="submit">Wyślij zgłoszenie</button>
-            <br />
-          </form>
-        </div>
+                  <div>
+                    {errors.cv?.message && (
+                      <div className={s.message}>{errors.cv?.message}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h2>Doświadczenie w Programowaniu</h2>
+                <div>
+                  <label>
+                    <input
+                      {...register("checkbox")}
+                      onChange={handleCheckboxChange}
+                      type="checkbox"
+                    />
+                    Czy posiadasz doświadczenie w programowaniu?
+                  </label>
+                  <div>
+                    {errors.experience?.message && (
+                      <p className={s.message}>{errors.experience?.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    {checkboxValue && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            append({ name: "JavaScript", level: 1 });
+                          }}
+                        >
+                          Dodaj doświadczenie
+                        </button>
+
+                        {fields.map((field, index) => (
+                          <div className={s.experience} key={field.id}>
+                            <select
+                              className={s.selectField}
+                              {...register(`experience.${index}.name`)}
+                              defaultValue={"JavaScript"}
+                            >
+                              <Options arr={optionList} />
+                            </select>
+                            <select
+                              className={s.selectField}
+                              {...register(`experience.${index}.level`)}
+                            >
+                              <Options arr={levelList} />
+                            </select>
+                            <button type="button" onClick={() => remove(index)}>
+                              Usuń
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button type="submit">Wyślij zgłoszenie</button>
+              </div>
+            </form>
+          </FormProvider>
+        </>
       )}
+
       {getData !== 0 && <Modal data={getData} />}
     </>
   );
