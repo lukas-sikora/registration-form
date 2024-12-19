@@ -1,0 +1,29 @@
+.inputContainer {
+  width: 100%;
+  position: relative;
+  text-align: start;
+}
+
+.messageContainer {
+  height: 1.2em;
+  padding-top: 0.2em;
+}
+
+.message {
+  margin: 0;
+  font-size: 12px;
+  word-wrap: normal;
+  color: var(--third-color);
+}
+
+.inputField {
+  background-color: var(--second-color);
+  box-sizing: border-box;
+  width: 100%;
+  height: 2.5em;
+  padding: 0.5em;
+  text-align: start;
+  border: 2px solid var(--h2-color);
+  border-radius: 5px;
+  color: var(--text-color);
+}

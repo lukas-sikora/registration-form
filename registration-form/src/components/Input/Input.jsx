@@ -15,8 +15,8 @@ const Input = ({ type = "text", name, placeholder }) => {
         {...register(name)}
         placeholder={placeholder}
       ></input>
-      <div>
-      {errors[name] && <p>{errors[name]?.message}</p>}
+      <div className={s.messageContainer}>
+      {errors[name] && <p className={s.message}>{errors[name]?.message}</p>}
     </div>
     </div>
   );

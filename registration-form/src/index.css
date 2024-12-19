@@ -1,3 +1,13 @@
+:root{
+  --primary-color: #252424;
+  --second-color: #4a4a58;
+  --third-color:#ff0000;
+  --fourth-color:#0000ff;
+  --add-button-color:#07b107;
+  --text-color:#ffffff;
+  --h1-color: #1ca29b;
+  --h2-color: #ed9f10;
+}
 body {
   margin: 0;
   display: flex;
